@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32319.34
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnhancedCanonEF1", "EnhancedCanonEF1\EnhancedCanonEF1.csproj", "{04240C61-AAB4-4052-8247-AF64888230FE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7AA9CAC3-197B-4C18-B8A3-11A5C344C51E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		CodeMaid.config = CodeMaid.config
+		lens.txt = lens.txt
+		LICENSE.txt = LICENSE.txt
+		README.txt = README.txt
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnhancedCanonEF2", "EnhancedCanonEF2\EnhancedCanonEF2.csproj", "{A1F5B29C-4547-4DE3-A742-B2ECE36AE14E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Installer", "Installer", "{DD5E80A6-D848-4C34-A2C5-D481D8D072CF}"
+	ProjectSection(SolutionItems) = preProject
+		Installer\Enhanced CanonEF Setup.iss = Installer\Enhanced CanonEF Setup.iss
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{04240C61-AAB4-4052-8247-AF64888230FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04240C61-AAB4-4052-8247-AF64888230FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04240C61-AAB4-4052-8247-AF64888230FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04240C61-AAB4-4052-8247-AF64888230FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1F5B29C-4547-4DE3-A742-B2ECE36AE14E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1F5B29C-4547-4DE3-A742-B2ECE36AE14E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1F5B29C-4547-4DE3-A742-B2ECE36AE14E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1F5B29C-4547-4DE3-A742-B2ECE36AE14E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8931072F-881C-4BE9-AA73-1520A4485AFC}
+	EndGlobalSection
+EndGlobal
