@@ -63,29 +63,9 @@ namespace ASCOM.EnhancedCanonEF.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap aperture2 {
-            get {
-                object obj = ResourceManager.GetObject("aperture2", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap ASCOM {
             get {
                 object obj = ResourceManager.GetObject("ASCOM", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap canonef_logo {
-            get {
-                object obj = ResourceManager.GetObject("canonef_logo", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

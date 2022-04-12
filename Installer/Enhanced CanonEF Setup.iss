@@ -5,12 +5,12 @@
 [Setup]
 AppID={{9e28610a-3700-4ea8-b3a4-4a128b3faac7}
 AppName=Enhanced Astromechanics ASCOM Driver
-AppVerName=Enhanced Astromechanics ASCOM Driver 1.0.0.0
-AppVersion=1.0.0.0
+AppVerName=Enhanced Astromechanics ASCOM Driver 1.1.0.0
+AppVersion=1.1.0.0
 AppPublisher=Dale Ghent <daleg@elemental.org>
 AppPublisherURL=mailto:daleg@elemental.org
-AppSupportURL=https://ascomtalk.groups.io/g/Help
-AppUpdatesURL=https://ascom-standards.org/
+AppSupportURL=https://daleghent.com/
+AppUpdatesURL=https://daleghent.com/
 VersionInfoVersion=1.0.0
 MinVersion=6.1.7601
 DefaultDirName="{commoncf}\ASCOM\Focuser\ASCOM.EnhancedLens.Controller"
@@ -32,14 +32,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Dirs]
 Name: "{commoncf}\ASCOM\Uninstall\Focuser\Enhanced CanonEF"
 Name: "{commoncf}\ASCOM\Uninstall\Focuser\Enhanced CanonEF"
-; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
 Source: "E:\repos\EFlens\EnhancedCanonEF1\bin\Release\ASCOM.EnhancedCanonEF.Focuser.dll"; DestDir: "{app}"
 Source: "E:\repos\EFlens\EnhancedCanonEF2\bin\Release\ASCOM.EnhancedCanonEF2.Focuser.dll"; DestDir: "{app}"
-; Require a read-me HTML to appear after installation, maybe driver's Help doc
 Source: "E:\repos\EFlens\README.txt"; DestDir: "{app}"; Flags: isreadme
-; TODO: Add other files needed by your driver here (add subfolders above)
 Source: "E:\repos\EFlens\lens.txt"; DestDir: "{app}";
 
 ; Only if driver is .NET

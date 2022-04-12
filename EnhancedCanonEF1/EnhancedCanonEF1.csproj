@@ -86,6 +86,6 @@
   </ProjectExtensions>
   <PropertyGroup>
     <PostBuildEvent>echo "Copying $(TargetFileName)"
-xcopy "$(TargetPath)" "%25CommonProgramFiles(x86)%25\ASCOM\Focuser\$(TargetFileName)" /h/i/c/k/e/r/y</PostBuildEvent>
+xcopy "$(TargetPath)" "%25CommonProgramFiles(x86)%25\ASCOM\Focuser\ASCOM.EnhancedLens.Controller\$(TargetFileName)" /h/i/c/k/e/r/y/f</PostBuildEvent>
   </PropertyGroup>
 </Project>

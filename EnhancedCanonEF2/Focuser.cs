@@ -24,27 +24,30 @@ namespace ASCOM.EnhancedCanonEF2 {
     [Guid("E3723731-EBE8-444F-BD0C-0DAF193EDB9E")]
     [ClassInterface(ClassInterfaceType.None)]
     public class Focuser : IFocuserV2 {
-        internal static int Aperture;
-        internal static List<string> FocalRatioList = new List<string>();
+        internal static string driverID = "ASCOM.EnhancedCanonEF2.Focuser";
+
         internal static string apertureDefault = "0";
         internal static string apertureProfileName = "Aperture";
-        internal static string comPort;
-        internal static string comPortDefault = "COM7";
+        internal static string comPortDefault = "COM1";
         internal static string comPortProfileName = "COM Port";
-        internal static string driverID = "ASCOM.EnhancedCanonEF2.Focuser";
-        internal static string LensModel;
         internal static string LensModelDefault = "";
         internal static string LensModelProfileName = "LensModel";
-        internal static bool traceState;
         internal static string traceStateDefault = "false";
         internal static string traceStateProfileName = "Trace Level";
-        private static string driverDescription = "Enhanced ASCOM Lens Driver (Focuser 2)";
-        private bool connectedState;
-        private readonly object serialLock = new object();
 
+        private static string driverDescription = "Enhanced ASCOM Lens Driver (Focuser 2)";
         private int focuserPosition = 5000;
+
+        internal static bool traceState;
+        internal static string LensModel;
+        internal static string comPort;
         private Serial serialPort;
         private TraceLogger tl;
+        internal static int Aperture;
+        internal static List<string> FocalRatioList = new List<string>();
+        private readonly object apertureLock = new object();
+        private readonly object serialLock = new object();
+        private bool connected = false;
 
         public Focuser() {
             ReadProfile();
@@ -52,38 +55,52 @@ namespace ASCOM.EnhancedCanonEF2 {
                 Enabled = traceState
             };
 
-            tl.LogMessage("Focuser", "Starting initialization");
-            connectedState = false;
             tl.LogMessage("Focuser", "Completed initialization");
         }
 
         public bool Absolute => true;
 
         public bool Connected {
-            get {
-                return serialPort != null && serialPort.Connected;
-            }
+            get => connected;
             set {
+                tl.LogMessage("Connected Set", value.ToString());
+
                 if (value) {
                     if (serialPort == null || !serialPort.Connected) {
-                        string text = comPort;
-                        if (string.IsNullOrEmpty(text)) {
-                            throw new NotConnectedException("No COM port has been selected");
+                        if (string.IsNullOrEmpty(comPort)) {
+                            throw new InvalidOperationException("No COM port has been selected");
                         }
+
+                        if (string.IsNullOrEmpty(LensModel)) {
+                            throw new InvalidOperationException("No lens has been configured");
+                        }
+
                         try {
                             serialPort = new Serial {
-                                PortName = text,
+                                PortName = comPort,
                                 Speed = SerialSpeed.ps38400,
                                 DTREnable = true,
-                                Connected = true
                             };
+
+                            if (!serialPort.AvailableCOMPorts.Contains(comPort)) {
+                                serialPort.Dispose();
+                                throw new InvalidOperationException($"{comPort} does not exist");
+                            }
+
+                            serialPort.Connected = true;
                         } catch (Exception ex) {
-                            throw new NotConnectedException(ex.Message.ToString(), (Exception)(object)ex);
+                            throw new InvalidOperationException(ex.Message.ToString(), (Exception)(object)ex);
                         }
+
+                        connected = true;
                     }
                 } else if (serialPort != null && serialPort.Connected) {
+                    connected = false;
                     serialPort.Connected = false;
+                    serialPort.Dispose();
                 }
+
+                tl.LogMessage("Connected Set", "Finished");
             }
         }
 
@@ -104,10 +121,12 @@ namespace ASCOM.EnhancedCanonEF2 {
 
         public bool Link {
             get {
+                CheckConnection();
                 tl.LogMessage("Link Get", Connected.ToString());
                 return Connected;
             }
             set {
+                CheckConnection();
                 tl.LogMessage("Link Set", value.ToString());
                 Connected = value;
             }
@@ -115,6 +134,7 @@ namespace ASCOM.EnhancedCanonEF2 {
 
         public int MaxIncrement {
             get {
+                CheckConnection();
                 tl.LogMessage("MaxIncrement Get", 10000.ToString());
                 return 10000;
             }
@@ -122,6 +142,7 @@ namespace ASCOM.EnhancedCanonEF2 {
 
         public int MaxStep {
             get {
+                CheckConnection();
                 tl.LogMessage("MaxStep Get", 10000.ToString());
                 return 10000;
             }
@@ -131,10 +152,10 @@ namespace ASCOM.EnhancedCanonEF2 {
 
         public int Position {
             get {
-                if (Aperture != -1) {
-                    CommandBlind($"A{Aperture:D2}#", raw: false);
-                }
+                CheckConnection();
+                tl.LogMessage("Position Get", focuserPosition.ToString());
 
+                SetApertureInternal(Aperture, false);
                 return focuserPosition;
             }
         }
@@ -143,28 +164,36 @@ namespace ASCOM.EnhancedCanonEF2 {
 
         public ArrayList SupportedActions {
             get {
+                CheckConnection();
+
                 var actions = new ArrayList() {
                     "GetApertureIndex",
+                    "SetApertureIndex",
                     "GetFocalRatioList",
                     "GetLensModel",
-                    "SetAperture",
                 };
 
-                tl.LogMessage("SupportedActions Get", actions.ToString());
+                tl.LogMessage("SupportedActions Get", string.Join(", ", actions.Cast<string>().ToArray()));
                 return actions;
             }
         }
 
         public bool TempComp {
-            get => false;
+            get {
+                CheckConnection();
+                return false;
+            }
             set => throw new PropertyNotImplementedException("TempComp", accessorSet: true);
         }
 
-        public bool TempCompAvailable => false;
+        public bool TempCompAvailable {
+            get {
+                CheckConnection();
+                return false;
+            }
+        }
 
         public double Temperature => throw new PropertyNotImplementedException("Temperature", accessorSet: false);
-
-        private bool IsConnected => connectedState;
 
         [ComRegisterFunction]
         public static void RegisterASCOM(Type t) {
@@ -177,21 +206,22 @@ namespace ASCOM.EnhancedCanonEF2 {
         }
 
         public string Action(string actionName, string actionParameters) {
+            CheckConnection();
+
             tl.LogMessage("Action", $"{actionName} {actionParameters}");
             var response = string.Empty;
 
             // ASCOM spec requires that the Action be accepted regardless of case, so
             // normalize the supplied Action name to lower-case
-            var actionNameLC = actionName.ToLower();
+            var actionNameLC = actionName.ToLower(System.Globalization.CultureInfo.InvariantCulture);
 
             switch (actionNameLC) {
                 case "getlensmodel":
-                    response = GetLensModel();
+                    response = LensModel;
                     break;
 
-                case "setaperture":
-                    var aperture = int.Parse(actionParameters);
-                    SetApertureAction(aperture);
+                case "setapertureindex":
+                    SetApertureInternal(int.Parse(actionParameters), true);
                     break;
 
                 case "getapertureindex":
@@ -199,7 +229,7 @@ namespace ASCOM.EnhancedCanonEF2 {
                     break;
 
                 case "getfocalratiolist":
-                    response = string.Join(",", FocalRatioList);
+                    response = string.Join(":", FocalRatioList);
                     break;
 
                 default:
@@ -210,9 +240,8 @@ namespace ASCOM.EnhancedCanonEF2 {
         }
 
         public void CommandBlind(string command, bool raw) {
-            if (!Connected) {
-                throw new NotConnectedException();
-            }
+            CheckConnection();
+            tl.LogMessage("CommandBlind", $"Command: {command}, Raw: {raw}");
 
             lock (serialLock) {
                 serialPort.ClearBuffers();
@@ -225,9 +254,8 @@ namespace ASCOM.EnhancedCanonEF2 {
         }
 
         public string CommandString(string command, bool raw) {
-            if (!Connected) {
-                throw new NotConnectedException();
-            }
+            CheckConnection();
+            tl.LogMessage("CommandString", $"Command: {command}, Raw: {raw}");
 
             string text = string.Empty;
 
@@ -250,15 +278,19 @@ namespace ASCOM.EnhancedCanonEF2 {
             throw new MethodNotImplementedException("Halt");
         }
 
-        public void Move(int Value) {
-            CommandBlind("M" + Value + "#", raw: true);
+        public void Move(int position) {
+            CheckConnection();
+            tl.LogMessage("Move", position.ToString());
+
+            CommandBlind($"M{position}#", raw: true);
             string s = CommandString("P#", raw: false);
             focuserPosition = int.Parse(s);
         }
 
         public void SetupDialog() {
-            if (IsConnected) {
-                MessageBox.Show("This driver is already connected to the focuser. Just press OK");
+            if (connected) {
+                MessageBox.Show("The driver is already connected to the focuser.\nDisconnect to change any configuration parameters.");
+                return;
             }
 
             using SetupDialogForm setupDialogForm = new SetupDialogForm();
@@ -276,7 +308,6 @@ namespace ASCOM.EnhancedCanonEF2 {
             comPort = profile.GetValue(driverID, comPortProfileName, string.Empty, comPortDefault);
             Aperture = Convert.ToInt32(profile.GetValue(driverID, apertureProfileName, string.Empty, apertureDefault));
             LensModel = profile.GetValue(driverID, LensModelProfileName, string.Empty, LensModelDefault);
-
             FocalRatioList = Utility.GetFocalRatios(LensModel);
         }
 
@@ -300,14 +331,27 @@ namespace ASCOM.EnhancedCanonEF2 {
             }
         }
 
-        private string GetLensModel() {
-            return LensModel;
+        private bool CheckConnection() {
+            if (!connected || !serialPort.Connected) {
+                throw new NotConnectedException("Driver is not connected to the hardware.");
+            }
+
+            return true;
         }
 
-        private void SetApertureAction(int aperture) {
-            Aperture = aperture;
-            CommandBlind("A00#", true);
-            CommandBlind($"A{Aperture:D2}#", true);
+        private void SetApertureInternal(int aperture, bool withReset) {
+            tl.LogMessage("SetApertureInternal", $"{aperture}, {withReset}");
+
+            if (Aperture >= 0) {
+                lock (apertureLock) {
+                    if (withReset) {
+                        CommandBlind($"A00#", raw: false);
+                    }
+
+                    CommandBlind($"A{aperture:D2}#", raw: false);
+                    Aperture = aperture;
+                }
+            }
         }
     }
 }
