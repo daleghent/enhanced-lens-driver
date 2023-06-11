@@ -51,6 +51,8 @@ namespace ASCOM.EnhancedCanonEF {
         private Label titleLabel;
         private Label explainerLabel;
         private Label about;
+        private Label label_MaxFocuserPos;
+        private TextBox textBox_MaxFocusPosition;
         private Label lensTxtLink;
 
         public SetupDialogForm() {
@@ -95,6 +97,7 @@ namespace ASCOM.EnhancedCanonEF {
                 comboBoxComPort.SelectedItem = Focuser.comPort;
                 comboBoxLensModel.Text = Focuser.LensModel;
                 comboBoxAppValue.Text = comboBoxAppValue.Items[Focuser.Aperture].ToString();
+                textBox_MaxFocusPosition.Text = Focuser.MaxFocuserPos.ToString();
                 checkBoxDebugLog.Checked = Focuser.traceState;
             } catch {
             }
@@ -110,6 +113,7 @@ namespace ASCOM.EnhancedCanonEF {
                 } else {
                     Focuser.Aperture = -1;
                 }
+                Focuser.MaxFocuserPos = Convert.ToInt32(textBox_MaxFocusPosition.Text);
             } catch {
             }
             Close();
@@ -182,6 +186,18 @@ namespace ASCOM.EnhancedCanonEF {
             base.Dispose(disposing);
         }
 
+        private void textBox_MaxFocuserPos_KeyPress(object sender, KeyPressEventArgs e) {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) &&
+                (e.KeyChar != '.')) {
+                e.Handled = true;
+            }
+
+            // only allow one decimal point
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1)) {
+                e.Handled = true;
+            }
+        }
+
         private void InitializeComponent() {
             this.cmdOK = new System.Windows.Forms.Button();
             this.cmdCancel = new System.Windows.Forms.Button();
@@ -200,6 +216,8 @@ namespace ASCOM.EnhancedCanonEF {
             this.explainerLabel = new System.Windows.Forms.Label();
             this.about = new System.Windows.Forms.Label();
             this.lensTxtLink = new System.Windows.Forms.Label();
+            this.label_MaxFocuserPos = new System.Windows.Forms.Label();
+            this.textBox_MaxFocusPosition = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.SuspendLayout();
             // 
@@ -207,7 +225,7 @@ namespace ASCOM.EnhancedCanonEF {
             // 
             this.cmdOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.cmdOK.Location = new System.Drawing.Point(257, 272);
+            this.cmdOK.Location = new System.Drawing.Point(257, 341);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(59, 24);
             this.cmdOK.TabIndex = 0;
@@ -219,7 +237,7 @@ namespace ASCOM.EnhancedCanonEF {
             // 
             this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cmdCancel.Location = new System.Drawing.Point(322, 271);
+            this.cmdCancel.Location = new System.Drawing.Point(322, 340);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(59, 25);
             this.cmdCancel.TabIndex = 1;
@@ -362,7 +380,7 @@ namespace ASCOM.EnhancedCanonEF {
             this.about.Cursor = System.Windows.Forms.Cursors.Hand;
             this.about.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.about.ForeColor = System.Drawing.Color.Red;
-            this.about.Location = new System.Drawing.Point(21, 276);
+            this.about.Location = new System.Drawing.Point(22, 312);
             this.about.Name = "about";
             this.about.Size = new System.Drawing.Size(95, 15);
             this.about.TabIndex = 17;
@@ -384,11 +402,32 @@ namespace ASCOM.EnhancedCanonEF {
             this.lensTxtLink.Text = "lens.txt";
             this.lensTxtLink.Click += new System.EventHandler(this.lensTxtLink_Click);
             // 
+            // label_MaxFocuserPos
+            // 
+            this.label_MaxFocuserPos.AutoSize = true;
+            this.label_MaxFocuserPos.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label_MaxFocuserPos.Location = new System.Drawing.Point(22, 276);
+            this.label_MaxFocuserPos.Name = "label_MaxFocuserPos";
+            this.label_MaxFocuserPos.Size = new System.Drawing.Size(152, 15);
+            this.label_MaxFocuserPos.TabIndex = 22;
+            this.label_MaxFocuserPos.Text = "Maximum Focuser Position";
+            // 
+            // textBox_MaxFocusPosition
+            // 
+            this.textBox_MaxFocusPosition.Location = new System.Drawing.Point(180, 274);
+            this.textBox_MaxFocusPosition.Name = "textBox_MaxFocusPosition";
+            this.textBox_MaxFocusPosition.Size = new System.Drawing.Size(185, 20);
+            this.textBox_MaxFocusPosition.TabIndex = 23;
+            this.textBox_MaxFocusPosition.Text = "10000";
+            this.textBox_MaxFocusPosition.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_MaxFocuserPos_KeyPress);
+            // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(391, 308);
+            this.ClientSize = new System.Drawing.Size(391, 377);
+            this.Controls.Add(this.textBox_MaxFocusPosition);
+            this.Controls.Add(this.label_MaxFocuserPos);
             this.Controls.Add(this.titleLabel);
             this.Controls.Add(this.explainerLabel);
             this.Controls.Add(this.picASCOM);

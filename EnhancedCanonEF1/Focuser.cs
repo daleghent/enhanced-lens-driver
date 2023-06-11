@@ -30,6 +30,8 @@ namespace ASCOM.EnhancedCanonEF {
         internal static string apertureProfileName = "Aperture";
         internal static string comPortDefault = "COM1";
         internal static string comPortProfileName = "COM Port";
+        internal static string maxFocuserPosDefault = "10000";
+        internal static string maxFocuserPosProfileName = "MaxFocuserPos";
         internal static string LensModelDefault = "";
         internal static string LensModelProfileName = "LensModel";
         internal static string traceStateDefault = "false";
@@ -44,6 +46,7 @@ namespace ASCOM.EnhancedCanonEF {
         private Serial serialPort;
         private TraceLogger tl;
         internal static int Aperture;
+        internal static int MaxFocuserPos;
         internal static List<string> FocalRatioList = new List<string>();
         private readonly object apertureLock = new object();
         private readonly object serialLock = new object();
@@ -131,16 +134,16 @@ namespace ASCOM.EnhancedCanonEF {
         public int MaxIncrement {
             get {
                 CheckConnection();
-                tl.LogMessage("MaxIncrement Get", 10000.ToString());
-                return 10000;
+                tl.LogMessage("MaxIncrement Get", Focuser.MaxFocuserPos.ToString());
+                return MaxFocuserPos;
             }
         }
 
         public int MaxStep {
             get {
                 CheckConnection();
-                tl.LogMessage("MaxStep Get", 10000.ToString());
-                return 10000;
+                tl.LogMessage("MaxStep Get", Focuser.MaxFocuserPos.ToString());
+                return Focuser.MaxFocuserPos;
             }
         }
 
@@ -275,6 +278,12 @@ namespace ASCOM.EnhancedCanonEF {
         }
 
         public void Move(int position) {
+            if (position > Focuser.MaxFocuserPos) {
+                string warning_msg = $"requested position {position} exceeds maximum focuser position {Focuser.MaxFocuserPos}";
+                tl.LogMessage("Move", warning_msg);
+                throw new DriverException(warning_msg);
+            }
+
             CheckConnection();
             tl.LogMessage("Move", position.ToString());
 
@@ -303,6 +312,7 @@ namespace ASCOM.EnhancedCanonEF {
             traceState = Convert.ToBoolean(profile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
             comPort = profile.GetValue(driverID, comPortProfileName, string.Empty, comPortDefault);
             Aperture = Convert.ToInt32(profile.GetValue(driverID, apertureProfileName, string.Empty, apertureDefault));
+            MaxFocuserPos = Convert.ToInt32(profile.GetValue(driverID, maxFocuserPosProfileName, string.Empty, maxFocuserPosDefault));
             LensModel = profile.GetValue(driverID, LensModelProfileName, string.Empty, LensModelDefault);
             FocalRatioList = Utility.GetFocalRatios(LensModel);
 
@@ -322,6 +332,7 @@ namespace ASCOM.EnhancedCanonEF {
             profile.WriteValue(driverID, traceStateProfileName, traceState.ToString());
             profile.WriteValue(driverID, comPortProfileName, comPort.ToString());
             profile.WriteValue(driverID, apertureProfileName, Aperture.ToString());
+            profile.WriteValue(driverID, maxFocuserPosProfileName, MaxFocuserPos.ToString());
             profile.WriteValue(driverID, LensModelProfileName, LensModel.ToString());
         }
 

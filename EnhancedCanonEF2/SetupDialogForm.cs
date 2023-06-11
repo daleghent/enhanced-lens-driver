@@ -51,6 +51,8 @@ namespace ASCOM.EnhancedCanonEF2 {
         private Label titleLabel;
         private Label explainerLabel;
         private Label about;
+        private TextBox textBox_MaxFocusPosition;
+        private Label label_MaxFocuserPos;
         private Label lensTxtLink;
 
         public SetupDialogForm() {
@@ -95,6 +97,7 @@ namespace ASCOM.EnhancedCanonEF2 {
                 comboBoxComPort.SelectedItem = Focuser.comPort;
                 comboBoxLensModel.Text = Focuser.LensModel;
                 comboBoxAppValue.Text = comboBoxAppValue.Items[Focuser.Aperture].ToString();
+                textBox_MaxFocusPosition.Text = Focuser.MaxFocuserPos.ToString();
                 checkBoxDebugLog.Checked = Focuser.traceState;
             } catch {
             }
@@ -110,6 +113,7 @@ namespace ASCOM.EnhancedCanonEF2 {
                 } else {
                     Focuser.Aperture = -1;
                 }
+                Focuser.MaxFocuserPos = Convert.ToInt32(textBox_MaxFocusPosition.Text);
             } catch {
             }
             Close();
@@ -182,6 +186,18 @@ namespace ASCOM.EnhancedCanonEF2 {
             base.Dispose(disposing);
         }
 
+        private void textBox_MaxFocuserPos_KeyPress(object sender, KeyPressEventArgs e) {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) &&
+                (e.KeyChar != '.')) {
+                e.Handled = true;
+            }
+
+            // only allow one decimal point
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1)) {
+                e.Handled = true;
+            }
+        }
+
         private void InitializeComponent() {
             this.cmdOK = new System.Windows.Forms.Button();
             this.cmdCancel = new System.Windows.Forms.Button();
@@ -200,44 +216,46 @@ namespace ASCOM.EnhancedCanonEF2 {
             this.explainerLabel = new System.Windows.Forms.Label();
             this.about = new System.Windows.Forms.Label();
             this.lensTxtLink = new System.Windows.Forms.Label();
+            this.textBox_MaxFocusPosition = new System.Windows.Forms.TextBox();
+            this.label_MaxFocuserPos = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.SuspendLayout();
-            //
+            // 
             // cmdOK
-            //
+            // 
             this.cmdOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.cmdOK.Location = new System.Drawing.Point(257, 272);
+            this.cmdOK.Location = new System.Drawing.Point(257, 341);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(59, 24);
             this.cmdOK.TabIndex = 0;
             this.cmdOK.Text = "OK";
             this.cmdOK.UseVisualStyleBackColor = true;
             this.cmdOK.Click += new System.EventHandler(this.cmdOK_Click);
-            //
+            // 
             // cmdCancel
-            //
+            // 
             this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cmdCancel.Location = new System.Drawing.Point(322, 271);
+            this.cmdCancel.Location = new System.Drawing.Point(322, 340);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(59, 25);
             this.cmdCancel.TabIndex = 1;
             this.cmdCancel.Text = "Cancel";
             this.cmdCancel.UseVisualStyleBackColor = true;
             this.cmdCancel.Click += new System.EventHandler(this.cmdCancel_Click);
-            //
+            // 
             // setupLabel
-            //
+            // 
             this.setupLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.setupLabel.Location = new System.Drawing.Point(160, 27);
             this.setupLabel.Name = "setupLabel";
             this.setupLabel.Size = new System.Drawing.Size(44, 18);
             this.setupLabel.TabIndex = 2;
             this.setupLabel.Text = "Setup";
-            //
+            // 
             // picASCOM
-            //
+            // 
             this.picASCOM.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.picASCOM.Cursor = System.Windows.Forms.Cursors.Hand;
             this.picASCOM.Image = global::ASCOM.EnhancedCanonEF2.Properties.Resources.ASCOM;
@@ -249,9 +267,9 @@ namespace ASCOM.EnhancedCanonEF2 {
             this.picASCOM.TabStop = false;
             this.picASCOM.Click += new System.EventHandler(this.BrowseToAscom);
             this.picASCOM.DoubleClick += new System.EventHandler(this.BrowseToAscom);
-            //
+            // 
             // COMPortLabel
-            //
+            // 
             this.COMPortLabel.AutoSize = true;
             this.COMPortLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.COMPortLabel.Location = new System.Drawing.Point(55, 87);
@@ -259,9 +277,9 @@ namespace ASCOM.EnhancedCanonEF2 {
             this.COMPortLabel.Size = new System.Drawing.Size(60, 15);
             this.COMPortLabel.TabIndex = 5;
             this.COMPortLabel.Text = "COM Port";
-            //
+            // 
             // checkBoxDebugLog
-            //
+            // 
             this.checkBoxDebugLog.AutoSize = true;
             this.checkBoxDebugLog.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.checkBoxDebugLog.Location = new System.Drawing.Point(124, 242);
@@ -270,18 +288,18 @@ namespace ASCOM.EnhancedCanonEF2 {
             this.checkBoxDebugLog.TabIndex = 6;
             this.checkBoxDebugLog.Text = "Debug Logging";
             this.checkBoxDebugLog.UseVisualStyleBackColor = true;
-            //
+            // 
             // comboBoxComPort
-            //
+            // 
             this.comboBoxComPort.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxComPort.FormattingEnabled = true;
             this.comboBoxComPort.Location = new System.Drawing.Point(123, 84);
             this.comboBoxComPort.Name = "comboBoxComPort";
             this.comboBoxComPort.Size = new System.Drawing.Size(242, 21);
             this.comboBoxComPort.TabIndex = 7;
-            //
+            // 
             // lensModelLabel
-            //
+            // 
             this.lensModelLabel.AutoSize = true;
             this.lensModelLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lensModelLabel.Location = new System.Drawing.Point(47, 122);
@@ -289,9 +307,9 @@ namespace ASCOM.EnhancedCanonEF2 {
             this.lensModelLabel.Size = new System.Drawing.Size(68, 15);
             this.lensModelLabel.TabIndex = 12;
             this.lensModelLabel.Text = "Lens Model";
-            //
+            // 
             // comboBoxLensModel
-            //
+            // 
             this.comboBoxLensModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxLensModel.FormattingEnabled = true;
             this.comboBoxLensModel.Location = new System.Drawing.Point(123, 119);
@@ -300,9 +318,9 @@ namespace ASCOM.EnhancedCanonEF2 {
             this.comboBoxLensModel.Size = new System.Drawing.Size(242, 21);
             this.comboBoxLensModel.TabIndex = 13;
             this.comboBoxLensModel.SelectedIndexChanged += new System.EventHandler(this.comboBoxLensModel_SelectedIndexChanged);
-            //
+            // 
             // defaultApertureLabel
-            //
+            // 
             this.defaultApertureLabel.AutoSize = true;
             this.defaultApertureLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.defaultApertureLabel.Location = new System.Drawing.Point(21, 207);
@@ -310,18 +328,18 @@ namespace ASCOM.EnhancedCanonEF2 {
             this.defaultApertureLabel.Size = new System.Drawing.Size(94, 15);
             this.defaultApertureLabel.TabIndex = 14;
             this.defaultApertureLabel.Text = "Default Aperture";
-            //
+            // 
             // comboBoxAppValue
-            //
+            // 
             this.comboBoxAppValue.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxAppValue.FormattingEnabled = true;
             this.comboBoxAppValue.Location = new System.Drawing.Point(124, 205);
             this.comboBoxAppValue.Name = "comboBoxAppValue";
             this.comboBoxAppValue.Size = new System.Drawing.Size(242, 21);
             this.comboBoxAppValue.TabIndex = 15;
-            //
+            // 
             // aboutLensTxtLabel
-            //
+            // 
             this.aboutLensTxtLabel.AutoSize = true;
             this.aboutLensTxtLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.aboutLensTxtLabel.Location = new System.Drawing.Point(121, 148);
@@ -330,48 +348,48 @@ namespace ASCOM.EnhancedCanonEF2 {
             this.aboutLensTxtLabel.TabIndex = 16;
             this.aboutLensTxtLabel.Text = "If this list does not contain your lens,\r\nadd it to              in the format de" +
     "scribed\r\nin that file.";
-            //
+            // 
             // label6
-            //
+            // 
             this.label6.Location = new System.Drawing.Point(0, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(100, 23);
             this.label6.TabIndex = 0;
-            //
+            // 
             // titleLabel
-            //
+            // 
             this.titleLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.titleLabel.Location = new System.Drawing.Point(64, 9);
             this.titleLabel.Name = "titleLabel";
             this.titleLabel.Size = new System.Drawing.Size(234, 18);
             this.titleLabel.TabIndex = 21;
             this.titleLabel.Text = "Enhanced Astromechanics Lens Driver";
-            //
+            // 
             // explainerLabel
-            //
+            // 
             this.explainerLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.explainerLabel.Location = new System.Drawing.Point(47, 45);
             this.explainerLabel.Name = "explainerLabel";
             this.explainerLabel.Size = new System.Drawing.Size(269, 18);
             this.explainerLabel.TabIndex = 18;
             this.explainerLabel.Text = "An unofficial driver for Astromechanics focusers";
-            //
+            // 
             // about
-            //
+            // 
             this.about.AutoSize = true;
             this.about.Cursor = System.Windows.Forms.Cursors.Hand;
             this.about.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.about.ForeColor = System.Drawing.Color.Red;
-            this.about.Location = new System.Drawing.Point(21, 276);
+            this.about.Location = new System.Drawing.Point(22, 312);
             this.about.Name = "about";
             this.about.Size = new System.Drawing.Size(95, 15);
             this.about.TabIndex = 17;
             this.about.Text = "About this driver";
             this.about.Click += new System.EventHandler(this.BrowseToWebsite);
             this.about.DoubleClick += new System.EventHandler(this.BrowseToWebsite);
-            //
+            // 
             // lensTxtLink
-            //
+            // 
             this.lensTxtLink.AutoSize = true;
             this.lensTxtLink.BackColor = System.Drawing.Color.Transparent;
             this.lensTxtLink.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -383,12 +401,33 @@ namespace ASCOM.EnhancedCanonEF2 {
             this.lensTxtLink.TabIndex = 18;
             this.lensTxtLink.Text = "lens.txt";
             this.lensTxtLink.Click += new System.EventHandler(this.lensTxtLink_Click);
-            //
+            // 
+            // label_MaxFocuserPos
+            // 
+            this.label_MaxFocuserPos.AutoSize = true;
+            this.label_MaxFocuserPos.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label_MaxFocuserPos.Location = new System.Drawing.Point(22, 276);
+            this.label_MaxFocuserPos.Name = "label_MaxFocuserPos";
+            this.label_MaxFocuserPos.Size = new System.Drawing.Size(152, 15);
+            this.label_MaxFocuserPos.TabIndex = 22;
+            this.label_MaxFocuserPos.Text = "Maximum Focuser Position";
+            // 
+            // textBox_MaxFocusPosition
+            // 
+            this.textBox_MaxFocusPosition.Location = new System.Drawing.Point(180, 274);
+            this.textBox_MaxFocusPosition.Name = "textBox_MaxFocusPosition";
+            this.textBox_MaxFocusPosition.Size = new System.Drawing.Size(185, 20);
+            this.textBox_MaxFocusPosition.TabIndex = 23;
+            this.textBox_MaxFocusPosition.Text = "10000";
+            this.textBox_MaxFocusPosition.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_MaxFocuserPos_KeyPress);
+            // 
             // SetupDialogForm
-            //
+            // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(391, 308);
+            this.ClientSize = new System.Drawing.Size(391, 378);
+            this.Controls.Add(this.textBox_MaxFocusPosition);
+            this.Controls.Add(this.label_MaxFocuserPos);
             this.Controls.Add(this.titleLabel);
             this.Controls.Add(this.explainerLabel);
             this.Controls.Add(this.picASCOM);
@@ -414,6 +453,7 @@ namespace ASCOM.EnhancedCanonEF2 {
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
     }
 }
